@@ -4,6 +4,7 @@ import type {
 } from '../../types/player'
 
 export type GoalkeeperMode =
+  | 'none'
   | 'fixed'
   | 'per-team'
 

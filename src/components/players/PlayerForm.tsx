@@ -1,11 +1,24 @@
-import { useEffect, useState } from 'react'
-import { Save, UserPlus, X } from 'lucide-react'
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react'
+
+import {
+  Save,
+  UserPlus,
+  X,
+} from 'lucide-react'
 
 import { Button } from '../common/Button'
 import { PLAYER_LEVELS } from '../../constants/playerLevels'
 import { usePlayerStore } from '../../store/playerStore'
 
-import type { Player, PlayerLevel } from '../../types/player'
+import type {
+  Player,
+  PlayerLevel,
+} from '../../types/player'
 
 interface PlayerFormProps {
   player?: Player | null
@@ -40,30 +53,21 @@ export function PlayerForm({
   const isEditing = Boolean(player)
 
   /*
-   * Normaliza o nome para comparação.
-   *
-   * Exemplos:
-   *
-   * "Paulo"
-   * " paulo "
-   * "PAULO"
-   *
-   * Todos serão considerados o mesmo nome.
+   * Normaliza o nome para evitar jogadores
+   * duplicados com diferenças de maiúsculas,
+   * minúsculas ou espaços.
    */
   const normalizedName = name
     .trim()
     .toLocaleLowerCase()
 
-  /*
-   * Verifica se já existe outro jogador
-   * utilizando esse nome.
-   *
-   * Durante a edição, o próprio jogador
-   * é ignorado.
-   */
   const isDuplicateName =
     normalizedName.length > 0 &&
     players.some((existingPlayer) => {
+      /*
+       * Quando estamos editando,
+       * ignoramos o próprio jogador.
+       */
       if (
         player &&
         existingPlayer.id === player.id
@@ -74,60 +78,58 @@ export function PlayerForm({
       return (
         existingPlayer.name
           .trim()
-          .toLocaleLowerCase() === normalizedName
+          .toLocaleLowerCase() ===
+        normalizedName
       )
     })
 
-  /*
-   * O formulário só pode ser enviado quando:
-   *
-   * - existe um nome;
-   * - existe um nível;
-   * - o nome não está duplicado.
-   */
   const isFormValid =
     name.trim().length > 0 &&
     Boolean(level) &&
     !isDuplicateName
 
   /*
-   * Quando entramos no modo de edição,
-   * carregamos os dados do jogador no formulário.
-   *
-   * Quando saímos do modo de edição,
-   * limpamos o formulário.
+   * Carrega os dados do jogador quando
+   * o usuário clica em "Editar".
    */
   useEffect(() => {
-    if (player) {
-      setName(player.name)
-      setLevel(player.level)
-      setIsGoalkeeper(player.isGoalkeeper)
+    if (!player) {
+      setName('')
+      setLevel('arroz-com-feijao')
+      setIsGoalkeeper(false)
       setError('')
 
       return
     }
 
-    setName('')
-    setLevel('arroz-com-feijao')
-    setIsGoalkeeper(false)
+    setName(player.name)
+    setLevel(player.level)
+    setIsGoalkeeper(player.isGoalkeeper)
     setError('')
+
+    /*
+     * Ao editar, leva o formulário para o topo
+     * da página para facilitar a visualização.
+     */
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
   }, [player])
 
-  /*
-   * Verificação adicional do nome.
-   *
-   * Mesmo que o botão esteja desabilitado,
-   * essa validação continua existindo para
-   * garantir que a regra seja respeitada.
-   */
   function isNameAlreadyUsed(
     playerName: string,
   ) {
-    const normalizedPlayerName = playerName
-      .trim()
-      .toLocaleLowerCase()
+    const normalizedPlayerName =
+      playerName
+        .trim()
+        .toLocaleLowerCase()
 
     return players.some((existingPlayer) => {
+      /*
+       * Não considera o próprio jogador
+       * como duplicado durante a edição.
+       */
       if (
         player &&
         existingPlayer.id === player.id
@@ -145,7 +147,7 @@ export function PlayerForm({
   }
 
   function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>,
+    event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault()
 
@@ -164,34 +166,55 @@ export function PlayerForm({
     }
 
     if (!level) {
-      setError('Selecione o nível do jogador.')
+      setError(
+        'Selecione o nível do jogador.',
+      )
       return
     }
 
-    const playerData = {
+    /*
+     * EDIÇÃO
+     */
+    if (player) {
+      const updatedPlayer: Player = {
+        ...player,
+        name: trimmedName,
+        level,
+        isGoalkeeper,
+      }
+
+      updatePlayer(
+        player.id,
+        updatedPlayer,
+      )
+
+      onFinishEditing?.()
+
+      resetForm()
+
+      return
+    }
+
+    /*
+     * NOVO JOGADOR
+     *
+     * O ID é criado aqui para garantir
+     * que cada jogador tenha uma identidade
+     * própria.
+     */
+    const newPlayer: Player = {
+      id: crypto.randomUUID(),
       name: trimmedName,
       level,
       isGoalkeeper,
     }
 
-    /*
-     * Se estamos editando:
-     * atualiza o jogador existente.
-     *
-     * Caso contrário:
-     * cria um novo jogador.
-     */
-    if (player) {
-      updatePlayer(player.id, playerData)
+    addPlayer(newPlayer)
 
-      onFinishEditing?.()
-    } else {
-      addPlayer(playerData)
-    }
+    resetForm()
+  }
 
-    /*
-     * Limpa o formulário depois de salvar.
-     */
+  function resetForm() {
     setName('')
     setLevel('arroz-com-feijao')
     setIsGoalkeeper(false)
@@ -199,24 +222,15 @@ export function PlayerForm({
   }
 
   function handleCancel() {
-    setName('')
-    setLevel('arroz-com-feijao')
-    setIsGoalkeeper(false)
-    setError('')
-
+    resetForm()
     onFinishEditing?.()
   }
 
   function handleNameChange(
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
   ) {
     setName(event.target.value)
 
-    /*
-     * Limpa uma mensagem de erro antiga
-     * assim que o usuário começa a corrigir
-     * o campo.
-     */
     if (error) {
       setError('')
     }
@@ -300,21 +314,25 @@ export function PlayerForm({
             focus:ring-2
             ${
               isDuplicateName
-                ? 'border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-red-100'
-                : 'border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary-soft)]'
+                ? `
+                  border-[var(--color-danger)]
+                  focus:border-[var(--color-danger)]
+                  focus:ring-red-100
+                `
+                : `
+                  border-[var(--color-border)]
+                  focus:border-[var(--color-primary)]
+                  focus:ring-[var(--color-primary-soft)]
+                `
             }
           `}
         />
-
-        {/* NOME DUPLICADO */}
 
         {isDuplicateName && (
           <p className="mt-2 text-sm text-[var(--color-danger)]">
             Já existe um jogador com esse nome.
           </p>
         )}
-
-        {/* OUTROS ERROS */}
 
         {error && !isDuplicateName && (
           <p className="mt-2 text-sm text-[var(--color-danger)]">
@@ -331,40 +349,51 @@ export function PlayerForm({
         </span>
 
         <div className="grid gap-2">
-          {PLAYER_LEVELS.map((playerLevel) => {
-            const selected =
-              level === playerLevel.value
+          {PLAYER_LEVELS.map(
+            (playerLevel) => {
+              const selected =
+                level === playerLevel.value
 
-            return (
-              <button
-                key={playerLevel.value}
-                type="button"
-                onClick={() =>
-                  setLevel(playerLevel.value)
-                }
-                className={`
-                  rounded-xl
-                  border
-                  p-4
-                  text-left
-                  transition
-                  ${
-                    selected
-                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)]'
-                      : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-secondary)]'
+              return (
+                <button
+                  key={playerLevel.value}
+                  type="button"
+                  onClick={() =>
+                    setLevel(
+                      playerLevel.value,
+                    )
                   }
-                `}
-              >
-                <span className="block font-semibold">
-                  {playerLevel.label}
-                </span>
+                  className={`
+                    rounded-xl
+                    border
+                    p-4
+                    text-left
+                    transition
+                    ${
+                      selected
+                        ? `
+                          border-[var(--color-primary)]
+                          bg-[var(--color-primary-soft)]
+                        `
+                        : `
+                          border-[var(--color-border)]
+                          bg-[var(--color-surface)]
+                          hover:bg-[var(--color-surface-secondary)]
+                        `
+                    }
+                  `}
+                >
+                  <span className="block font-semibold">
+                    {playerLevel.label}
+                  </span>
 
-                <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
-                  Força {playerLevel.strength}/3
-                </span>
-              </button>
-            )
-          })}
+                  <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
+                    Força {playerLevel.strength}/3
+                  </span>
+                </button>
+              )
+            },
+          )}
         </div>
       </div>
 
@@ -373,7 +402,9 @@ export function PlayerForm({
       <button
         type="button"
         onClick={() =>
-          setIsGoalkeeper((value) => !value)
+          setIsGoalkeeper(
+            (value) => !value,
+          )
         }
         className={`
           mt-5
@@ -388,8 +419,13 @@ export function PlayerForm({
           transition
           ${
             isGoalkeeper
-              ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)]'
-              : 'border-[var(--color-border)]'
+              ? `
+                border-[var(--color-primary)]
+                bg-[var(--color-primary-soft)]
+              `
+              : `
+                border-[var(--color-border)]
+              `
           }
         `}
       >
@@ -458,7 +494,6 @@ export function PlayerForm({
             onClick={handleCancel}
           >
             <X size={18} />
-
             Cancelar
           </Button>
         )}

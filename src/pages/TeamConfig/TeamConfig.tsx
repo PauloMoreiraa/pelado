@@ -1,25 +1,69 @@
 import { ArrowLeft, Settings } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { Button } from '../../components/common/Button'
 import { GoalkeeperConfig } from '../../components/team-config/GoalkeeperConfig'
-import { OrganizationMode } from '../../components/team-config/OrganizationMode'
 import { TeamSizeSelector } from '../../components/team-config/TeamSizeSelector'
 
 import { usePlayerStore } from '../../store/playerStore'
+import { useTeamConfigStore } from '../../store/teamConfigStore'
+import { useTeamResultStore } from '../../store/teamResultStore'
+
+import { generateTeams } from '../../features/team-generator'
 
 export function TeamConfig() {
+  const navigate = useNavigate()
+
   const players = usePlayerStore(
     (state) => state.players,
   )
 
-  const hasEnoughPlayers = players.length >= 3
+  const playersPerTeam = useTeamConfigStore(
+    (state) => state.playersPerTeam,
+  )
+
+  const goalkeeperMode = useTeamConfigStore(
+    (state) => state.goalkeeperMode,
+  )
+
+  const setResult = useTeamResultStore(
+    (state) => state.setResult,
+  )
+
+  const hasEnoughPlayers = players.length >= 4
+
+  function handleGenerateTeams() {
+    if (!hasEnoughPlayers) {
+      return
+    }
+
+    try {
+      const result = generateTeams({
+        players,
+        playersPerTeam,
+        goalkeeperMode,
+      })
+
+      setResult(
+        result.teams,
+        result.nextPlayers,
+      )
+
+      navigate('/resultado')
+    } catch (error) {
+      console.error(
+        'Erro ao gerar equipes:',
+        error,
+      )
+    }
+  }
 
   return (
     <section className="px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-3xl">
         <button
           type="button"
-          onClick={() => window.history.back()}
+          onClick={() => navigate('/jogadores')}
           className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-text-secondary)] transition hover:text-[var(--color-primary)]"
         >
           <ArrowLeft size={18} />
@@ -34,12 +78,12 @@ export function TeamConfig() {
 
             <div>
               <h1 className="text-2xl font-bold sm:text-3xl">
-                Configurar times
+                Sortear times
               </h1>
 
               <p className="text-sm text-[var(--color-text-muted)]">
-                Defina como o Peladô deve organizar os
-                jogadores.
+                Defina como o Peladô deve organizar
+                os jogadores.
               </p>
             </div>
           </div>
@@ -52,8 +96,8 @@ export function TeamConfig() {
             </p>
 
             <p className="mt-1 text-sm text-[var(--color-danger)]">
-              Cadastre pelo menos 3 jogadores para
-              continuar.
+              Cadastre pelo menos 4 jogadores
+              para continuar.
             </p>
           </div>
         )}
@@ -64,16 +108,16 @@ export function TeamConfig() {
           />
 
           <GoalkeeperConfig />
-
-          <OrganizationMode />
         </div>
 
         <div className="mt-8">
           <Button
+            type="button"
             className="w-full"
             disabled={!hasEnoughPlayers}
+            onClick={handleGenerateTeams}
           >
-            Continuar
+            Sortear times
           </Button>
         </div>
       </div>

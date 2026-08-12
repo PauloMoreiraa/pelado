@@ -18,43 +18,122 @@ interface PlayerState {
   clearPlayers: () => void
 }
 
-export const usePlayerStore = create<PlayerState>()(
-  persist(
-    (set) => ({
-      players: [],
+/*
+ * Garante que todos os jogadores tenham
+ * um ID único.
+ *
+ * Isso também corrige jogadores antigos
+ * que possam ter sido salvos sem ID no
+ * localStorage.
+ */
+function normalizePlayers(
+  players: Player[],
+): Player[] {
+  const usedIds = new Set<string>()
 
-      addPlayer: (player) =>
-        set((state) => ({
-          players: [
-            ...state.players,
-            player,
-          ],
-        })),
+  return players.map((player) => {
+    let id = player.id
 
-      updatePlayer: (id, player) =>
-        set((state) => ({
-          players: state.players.map(
-            (currentPlayer) =>
-              currentPlayer.id === id
-                ? player
-                : currentPlayer,
-          ),
-        })),
+    /*
+     * Se não existir ID ou se o ID estiver
+     * duplicado, cria um novo.
+     */
+    if (!id || usedIds.has(id)) {
+      id = crypto.randomUUID()
+    }
 
-      removePlayer: (id) =>
-        set((state) => ({
-          players: state.players.filter(
-            (player) => player.id !== id,
-          ),
-        })),
+    usedIds.add(id)
 
-      clearPlayers: () =>
-        set({
-          players: [],
-        }),
-    }),
-    {
-      name: 'pelado-players',
-    },
-  ),
-)
+    return {
+      ...player,
+      id,
+    }
+  })
+}
+
+export const usePlayerStore =
+  create<PlayerState>()(
+    persist(
+      (set) => ({
+        players: [],
+
+        addPlayer: (player) =>
+          set((state) => {
+            /*
+             * O ID é sempre gerado pelo store.
+             *
+             * Assim nunca dependemos do
+             * formulário para identificar
+             * corretamente o jogador.
+             */
+            const newPlayer: Player = {
+              ...player,
+              id:
+                player.id &&
+                !state.players.some(
+                  (existingPlayer) =>
+                    existingPlayer.id ===
+                    player.id,
+                )
+                  ? player.id
+                  : crypto.randomUUID(),
+            }
+
+            return {
+              players: [
+                ...state.players,
+                newPlayer,
+              ],
+            }
+          }),
+
+        updatePlayer: (id, player) =>
+          set((state) => ({
+            players: state.players.map(
+              (currentPlayer) =>
+                currentPlayer.id === id
+                  ? {
+                      ...player,
+                      id,
+                    }
+                  : currentPlayer,
+            ),
+          })),
+
+        removePlayer: (id) =>
+          set((state) => ({
+            players: state.players.filter(
+              (player) =>
+                player.id !== id,
+            ),
+          })),
+
+        clearPlayers: () =>
+          set({
+            players: [],
+          }),
+      }),
+
+      {
+        name: 'pelado-players',
+
+        /*
+         * Quando o Zustand recuperar os dados
+         * antigos do localStorage, normalizamos
+         * os IDs antes de colocá-los no estado.
+         */
+        merge: (persistedState, currentState) => {
+          const persisted =
+            persistedState as Partial<PlayerState>
+
+          return {
+            ...currentState,
+            ...persisted,
+            players: normalizePlayers(
+              persisted.players ?? [],
+            ),
+          }
+        },
+      },
+    ),
+  )

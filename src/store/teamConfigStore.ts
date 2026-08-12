@@ -1,9 +1,8 @@
 import { create } from 'zustand'
 
-export type GoalkeeperMode =
-  | 'none'
-  | 'per-team'
-  | 'fixed'
+import type {
+  GoalkeeperMode,
+} from '../features/team-generator/types'
 
 export type OrganizationMode =
   | 'teams'

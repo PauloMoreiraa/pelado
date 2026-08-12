@@ -2,34 +2,67 @@ import { Shield } from 'lucide-react'
 
 import {
   useTeamConfigStore,
-  type GoalkeeperMode,
 } from '../../store/teamConfigStore'
 
+import { usePlayerStore } from '../../store/playerStore'
+
+import type {
+  GoalkeeperMode,
+} from '../../features/team-generator/types'
+
 export function GoalkeeperConfig() {
-  const goalkeeperMode = useTeamConfigStore(
-    (state) => state.goalkeeperMode,
+  const players = usePlayerStore(
+    (state) => state.players,
   )
 
-  const setGoalkeeperMode = useTeamConfigStore(
-    (state) => state.setGoalkeeperMode,
-  )
+  const goalkeeperMode =
+    useTeamConfigStore(
+      (state) => state.goalkeeperMode,
+    )
+
+  const setGoalkeeperMode =
+    useTeamConfigStore(
+      (state) => state.setGoalkeeperMode,
+    )
+
+  const goalkeeperCount =
+    players.filter(
+      (player) => player.isGoalkeeper,
+    ).length
 
   const options: {
     value: GoalkeeperMode
     title: string
     description: string
+    disabled?: boolean
   }[] = [
+    {
+      value: 'none',
+      title: 'Sem goleiros',
+      description:
+        'Os goleiros não terão tratamento especial.',
+    },
     {
       value: 'per-team',
       title: 'Goleiro por equipe',
       description:
-        'Distribui os goleiros entre as equipes.',
+        goalkeeperCount === 0
+          ? 'Cadastre pelo menos um goleiro para usar esta opção.'
+          : 'Distribui os goleiros entre as equipes.',
+      disabled:
+        goalkeeperCount === 0,
     },
     {
       value: 'fixed',
       title: 'Goleiro fixo',
       description:
-        'Os goleiros não entram no sorteio das equipes.',
+        goalkeeperCount === 0
+          ? 'Cadastre pelo menos dois goleiros para usar esta opção.'
+          : goalkeeperCount === 1
+            ? 'É necessário ter pelo menos dois goleiros cadastrados.'
+            : 'Os goleiros ficam fixos e não entram no sorteio das equipes.',
+      disabled:
+        goalkeeperCount < 2,
     },
   ]
 
@@ -60,9 +93,16 @@ export function GoalkeeperConfig() {
             <button
               key={option.value}
               type="button"
-              onClick={() =>
-                setGoalkeeperMode(option.value)
-              }
+              disabled={option.disabled}
+              onClick={() => {
+                if (option.disabled) {
+                  return
+                }
+
+                setGoalkeeperMode(
+                  option.value,
+                )
+              }}
               className={`
                 rounded-xl
                 border
@@ -70,9 +110,11 @@ export function GoalkeeperConfig() {
                 text-left
                 transition
                 ${
-                  selected
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)]'
-                    : 'border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]'
+                  option.disabled
+                    ? 'cursor-not-allowed border-[var(--color-border)] opacity-50'
+                    : selected
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)]'
+                      : 'border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]'
                 }
               `}
             >
