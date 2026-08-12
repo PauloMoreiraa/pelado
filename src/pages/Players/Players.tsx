@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { ArrowLeft, Users } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  Users,
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { PlayerForm } from '../../components/players/PlayerForm'
 import { PlayerList } from '../../components/players/PlayerList'
@@ -9,6 +14,8 @@ import { usePlayerStore } from '../../store/playerStore'
 import type { Player } from '../../types/player'
 
 export function Players() {
+  const navigate = useNavigate()
+
   const players = usePlayerStore(
     (state) => state.players,
   )
@@ -17,6 +24,17 @@ export function Players() {
     editingPlayer,
     setEditingPlayer,
   ] = useState<Player | null>(null)
+
+  const canContinue = players.length >= 4
+
+  function handleEdit(player: Player) {
+    setEditingPlayer(player)
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
 
   return (
     <section className="px-4 py-6 sm:px-6 sm:py-10">
@@ -65,10 +83,29 @@ export function Players() {
             </h2>
 
             <PlayerList
-              onEdit={setEditingPlayer}
+              onEdit={handleEdit}
             />
           </div>
         </div>
+
+        <div className="mt-8 flex justify-end">
+          <button
+            type="button"
+            disabled={!canContinue}
+            onClick={() => navigate('/configuracao')}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-4 font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+          >
+            Continuar
+            <ArrowRight size={20} />
+          </button>
+        </div>
+
+        {!canContinue && (
+          <p className="mt-3 text-right text-sm text-[var(--color-text-muted)]">
+            Cadastre pelo menos 4 jogadores para
+            continuar.
+          </p>
+        )}
       </div>
     </section>
   )

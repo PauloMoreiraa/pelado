@@ -1,69 +1,65 @@
 import { create } from 'zustand'
 
 export type GoalkeeperMode =
-  | 'fixed'
+  | 'none'
   | 'per-team'
+  | 'fixed'
 
 export type OrganizationMode =
   | 'teams'
   | 'competition'
 
-export type CompetitionMode =
-  | 'league'
-  | 'knockout'
-  | 'tournament'
-
-interface TeamConfigStore {
+interface TeamConfigState {
   playersPerTeam: number
-  goalkeeperMode: GoalkeeperMode
-  organizationMode: OrganizationMode
-  competitionMode: CompetitionMode
 
-  setPlayersPerTeam: (value: number) => void
-  setGoalkeeperMode: (value: GoalkeeperMode) => void
-  setOrganizationMode: (
-    value: OrganizationMode,
+  goalkeeperMode: GoalkeeperMode
+
+  organizationMode: OrganizationMode
+
+  setPlayersPerTeam: (
+    playersPerTeam: number,
   ) => void
-  setCompetitionMode: (
-    value: CompetitionMode,
+
+  setGoalkeeperMode: (
+    goalkeeperMode: GoalkeeperMode,
+  ) => void
+
+  setOrganizationMode: (
+    organizationMode: OrganizationMode,
   ) => void
 
   resetConfig: () => void
 }
 
-const DEFAULT_CONFIG = {
-  playersPerTeam: 5,
-  goalkeeperMode: 'per-team' as GoalkeeperMode,
-  organizationMode: 'teams' as OrganizationMode,
-  competitionMode: 'league' as CompetitionMode,
-}
-
 export const useTeamConfigStore =
-  create<TeamConfigStore>((set) => ({
-    ...DEFAULT_CONFIG,
+  create<TeamConfigState>((set) => ({
+    playersPerTeam: 5,
 
-    setPlayersPerTeam: (value) =>
+    goalkeeperMode: 'none',
+
+    organizationMode: 'teams',
+
+    setPlayersPerTeam: (playersPerTeam) =>
       set({
-        playersPerTeam: value,
+        playersPerTeam,
       }),
 
-    setGoalkeeperMode: (value) =>
+    setGoalkeeperMode: (goalkeeperMode) =>
       set({
-        goalkeeperMode: value,
+        goalkeeperMode,
       }),
 
-    setOrganizationMode: (value) =>
+    setOrganizationMode: (
+      organizationMode,
+    ) =>
       set({
-        organizationMode: value,
-      }),
-
-    setCompetitionMode: (value) =>
-      set({
-        competitionMode: value,
+        organizationMode,
       }),
 
     resetConfig: () =>
       set({
-        ...DEFAULT_CONFIG,
+        playersPerTeam: 5,
+        goalkeeperMode: 'none',
+        organizationMode: 'teams',
       }),
   }))

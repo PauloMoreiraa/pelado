@@ -1,53 +1,60 @@
 import { create } from 'zustand'
-import type { Player, PlayerLevel } from '../types/player'
+import { persist } from 'zustand/middleware'
 
-interface AddPlayerData {
-  name: string
-  level: PlayerLevel
-  isGoalkeeper: boolean
-}
+import type { Player } from '../types/player'
 
-interface PlayerStore {
+interface PlayerState {
   players: Player[]
 
-  addPlayer: (data: AddPlayerData) => void
-  updatePlayer: (id: string, data: AddPlayerData) => void
+  addPlayer: (player: Player) => void
+
+  updatePlayer: (
+    id: string,
+    player: Player,
+  ) => void
+
   removePlayer: (id: string) => void
+
   clearPlayers: () => void
 }
 
-export const usePlayerStore = create<PlayerStore>((set) => ({
-  players: [],
+export const usePlayerStore = create<PlayerState>()(
+  persist(
+    (set) => ({
+      players: [],
 
-  addPlayer: (data) =>
-    set((state) => ({
-      players: [
-        ...state.players,
-        {
-          id: crypto.randomUUID(),
-          ...data,
-        },
-      ],
-    })),
+      addPlayer: (player) =>
+        set((state) => ({
+          players: [
+            ...state.players,
+            player,
+          ],
+        })),
 
-  updatePlayer: (id, data) =>
-    set((state) => ({
-      players: state.players.map((player) =>
-        player.id === id
-          ? {
-              ...player,
-              ...data,
-            }
-          : player,
-      ),
-    })),
+      updatePlayer: (id, player) =>
+        set((state) => ({
+          players: state.players.map(
+            (currentPlayer) =>
+              currentPlayer.id === id
+                ? player
+                : currentPlayer,
+          ),
+        })),
 
-  removePlayer: (id) =>
-    set((state) => ({
-      players: state.players.filter(
-        (player) => player.id !== id,
-      ),
-    })),
+      removePlayer: (id) =>
+        set((state) => ({
+          players: state.players.filter(
+            (player) => player.id !== id,
+          ),
+        })),
 
-  clearPlayers: () => set({ players: [] }),
-}))
+      clearPlayers: () =>
+        set({
+          players: [],
+        }),
+    }),
+    {
+      name: 'pelado-players',
+    },
+  ),
+)

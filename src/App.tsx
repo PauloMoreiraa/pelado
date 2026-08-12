@@ -1,41 +1,43 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
-import { AppLayout } from './components/layout/AppLayout'
-
+import { Home } from './pages/Home/Home'
+import { Players } from './pages/Players/Players'
 import { TeamConfig } from './pages/TeamConfig/TeamConfig'
 import { TeamResult } from './pages/TeamResult/TeamResult'
-import { Players } from './pages/Players/Players'
 
 function App() {
   return (
-    <AppLayout>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to="/jogadores"
-              replace
-            />
-          }
-        />
+    <Routes>
+      <Route
+        path="/"
+        element={<Home />}
+      />
 
-        <Route
-          path="/jogadores"
-          element={<Players />}
-        />
+      <Route
+        path="/jogadores"
+        element={<Players />}
+      />
 
-        <Route
-          path="/configuracao"
-          element={<TeamConfig />}
-        />
+      <Route
+        path="/configuracao"
+        element={<TeamConfig />}
+      />
 
-        <Route
-          path="/resultado"
-          element={<TeamResult />}
-        />
-      </Routes>
-    </AppLayout>
+      <Route
+        path="/resultado"
+        element={<TeamResult />}
+      />
+
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
+      />
+    </Routes>
   )
 }
 
