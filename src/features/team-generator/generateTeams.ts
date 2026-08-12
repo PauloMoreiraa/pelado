@@ -73,20 +73,68 @@ export function generateTeams({
 
   const shuffledPlayers = shuffle(players)
 
-  const nextPlayers =
-    numberOfNextPlayers > 0
-      ? shuffledPlayers.slice(
-          shuffledPlayers.length -
+  let nextPlayers: typeof players = []
+
+  if (goalkeeperMode === 'per-team') {
+    const shuffledGoalkeepers = shuffle(
+      shuffledPlayers.filter(
+        (player) => player.isGoalkeeper,
+      ),
+    )
+
+    const shuffledFieldPlayers = shuffle(
+      shuffledPlayers.filter(
+        (player) => !player.isGoalkeeper,
+      ),
+    )
+
+    const overflowGoalkeepers =
+      numberOfNextPlayers > 0
+        ? Math.min(
+            Math.max(
+              0,
+              shuffledGoalkeepers.length -
+                numberOfTeams,
+            ),
             numberOfNextPlayers,
-        )
-      : []
+          )
+        : 0
+
+    const nextGoalkeepers =
+      shuffledGoalkeepers.slice(
+        0,
+        overflowGoalkeepers,
+      )
+
+    const remainingNextPlayers =
+      numberOfNextPlayers -
+      nextGoalkeepers.length
+
+    nextPlayers = [
+      ...nextGoalkeepers,
+      ...shuffledFieldPlayers.slice(
+        0,
+        remainingNextPlayers,
+      ),
+    ]
+  } else {
+    nextPlayers =
+      numberOfNextPlayers > 0
+        ? shuffledPlayers.slice(
+            shuffledPlayers.length -
+              numberOfNextPlayers,
+          )
+        : []
+  }
 
   const playersForTeams =
-    numberOfNextPlayers > 0
-      ? shuffledPlayers.slice(
-          0,
-          shuffledPlayers.length -
-            numberOfNextPlayers,
+    nextPlayers.length > 0
+      ? shuffledPlayers.filter(
+          (player) =>
+            !nextPlayers.some(
+              (nextPlayer) =>
+                nextPlayer.id === player.id,
+            ),
         )
       : shuffledPlayers
 

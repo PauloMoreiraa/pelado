@@ -32,8 +32,22 @@ export function TeamConfig() {
 
   const hasEnoughPlayers = players.length >= 4
 
+  const minimumPlayersForTwoTeams =
+    playersPerTeam * 2
+
+  const hasValidTeamSize =
+    players.length >= minimumPlayersForTwoTeams &&
+    Math.floor(players.length / playersPerTeam) >= 2
+
+  const maxTeamsPossible = Math.floor(
+    players.length / playersPerTeam,
+  )
+
   function handleGenerateTeams() {
-    if (!hasEnoughPlayers) {
+    if (
+      !hasEnoughPlayers ||
+      !hasValidTeamSize
+    ) {
       return
     }
 
@@ -102,6 +116,35 @@ export function TeamConfig() {
           </div>
         )}
 
+        {players.length > 0 &&
+          !hasValidTeamSize && (
+            <div className="mt-6 rounded-2xl border border-[var(--color-danger)] bg-red-50 p-4">
+              <p className="font-semibold text-[var(--color-danger)]">
+                Tamanho de equipe inválido
+              </p>
+
+              <p className="mt-1 text-sm text-[var(--color-danger)]">
+                Com {players.length}{' '}
+                {players.length === 1
+                  ? 'jogador'
+                  : 'jogadores'}, o máximo de
+                equipes com {playersPerTeam}{' '}
+                {playersPerTeam === 1
+                  ? 'jogador'
+                  : 'jogadores'} por time é{' '}
+                {maxTeamsPossible || 1}{' '}
+                {maxTeamsPossible === 1
+                  ? 'equipe'
+                  : 'equipes'}.
+                <br />
+                Para sortear com esse tamanho,
+                são necessários pelo menos{' '}
+                {minimumPlayersForTwoTeams}{' '}
+                jogadores.
+              </p>
+            </div>
+          )}
+
         <div className="mt-8 space-y-5">
           <TeamSizeSelector
             totalPlayers={players.length}
@@ -114,7 +157,10 @@ export function TeamConfig() {
           <Button
             type="button"
             className="w-full"
-            disabled={!hasEnoughPlayers}
+            disabled={
+              !hasEnoughPlayers ||
+              !hasValidTeamSize
+            }
             onClick={handleGenerateTeams}
           >
             Sortear times

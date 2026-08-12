@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 import { Button } from '../common/Button'
+import { Modal } from '../common/Modal'
 import { PLAYER_LEVELS } from '../../constants/playerLevels'
 import { usePlayerStore } from '../../store/playerStore'
 
@@ -41,6 +42,10 @@ export function PlayerForm({
     (state) => state.players,
   )
 
+  const clearPlayers = usePlayerStore(
+    (state) => state.clearPlayers,
+  )
+
   const [name, setName] = useState('')
   const [level, setLevel] =
     useState<PlayerLevel>('arroz-com-feijao')
@@ -49,6 +54,8 @@ export function PlayerForm({
     useState(false)
 
   const [error, setError] = useState('')
+  const [isClearModalOpen, setIsClearModalOpen] =
+    useState(false)
 
   const isEditing = Boolean(player)
 
@@ -226,6 +233,16 @@ export function PlayerForm({
     onFinishEditing?.()
   }
 
+  function handleClearPlayers() {
+    clearPlayers()
+    window.localStorage.removeItem(
+      'pelado-players',
+    )
+    resetForm()
+    onFinishEditing?.()
+    setIsClearModalOpen(false)
+  }
+
   function handleNameChange(
     event: ChangeEvent<HTMLInputElement>,
   ) {
@@ -388,7 +405,7 @@ export function PlayerForm({
                   </span>
 
                   <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
-                    Força {playerLevel.strength}/3
+                    Nível {playerLevel.strength}/3
                   </span>
                 </button>
               )
@@ -498,6 +515,55 @@ export function PlayerForm({
           </Button>
         )}
       </div>
+
+      <div className="mt-3">
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full"
+          disabled={players.length === 0}
+          onClick={() =>
+            setIsClearModalOpen(true)
+          }
+        >
+          Limpar todos os jogadores
+        </Button>
+      </div>
+
+      <Modal
+        open={isClearModalOpen}
+        title="Limpar jogadores"
+        onClose={() =>
+          setIsClearModalOpen(false)
+        }
+      >
+        <div className="space-y-5">
+          <p className="text-[var(--color-text-muted)]">
+            Essa ação vai remover todos os jogadores
+            cadastrados e não poderá ser desfeita.
+          </p>
+
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                setIsClearModalOpen(false)
+              }
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleClearPlayers}
+            >
+              Limpar todos
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </form>
   )
 }

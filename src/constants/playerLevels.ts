@@ -14,7 +14,7 @@ export const PLAYER_LEVELS: {
   },
   {
     value: 'arroz-com-feijao',
-    label: 'Arroz com Feijão',
+    label: 'Faz o Arroz com Feijão',
     shortLabel: 'Arroz com Feijão',
     strength: 2,
   },

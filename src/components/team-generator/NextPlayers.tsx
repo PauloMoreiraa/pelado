@@ -1,7 +1,17 @@
+import { PLAYER_LEVELS } from '../../constants/playerLevels'
 import type { Player } from '../../types/player'
 
 interface NextPlayersProps {
   players: Player[]
+}
+
+function getPlayerStars(level: Player['level']) {
+  const levelStrength =
+    PLAYER_LEVELS.find(
+      (item) => item.value === level,
+    )?.strength ?? 0
+
+  return '★'.repeat(levelStrength)
 }
 
 export function NextPlayers({
@@ -32,10 +42,32 @@ export function NextPlayers({
         {players.map((player) => (
           <div
             key={player.id}
-            className="rounded-xl bg-[var(--color-surface-secondary)] px-4 py-3"
+            className="flex items-center justify-between gap-3 rounded-xl bg-[var(--color-surface-secondary)] px-4 py-3"
           >
             <span className="font-medium">
               {player.name}
+            </span>
+
+            <span
+              className="flex items-center gap-2 text-sm text-[var(--color-primary)]"
+              title={
+                PLAYER_LEVELS.find(
+                  (item) => item.value === player.level,
+                )?.label ?? 'Jogador'
+              }
+              aria-label={
+                PLAYER_LEVELS.find(
+                  (item) => item.value === player.level,
+                )?.label ?? 'Jogador'
+              }
+            >
+              {player.isGoalkeeper && (
+                <span title="Goleiro" aria-label="Goleiro">
+                  🧤
+                </span>
+              )}
+
+              {getPlayerStars(player.level)}
             </span>
           </div>
         ))}

@@ -2,8 +2,11 @@ import {
   ArrowLeft,
   RotateCcw,
 } from 'lucide-react'
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import {
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
 
 import { NextPlayers } from '../../components/team-generator/NextPlayers'
 import { TeamResult as TeamResultCard } from '../../components/team-generator/TeamResult'
@@ -12,6 +15,9 @@ import { useTeamResultStore } from '../../store/teamResultStore'
 
 export function TeamResult() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [isFinishing, setIsFinishing] =
+    useState(false)
 
   const teams = useTeamResultStore(
     (state) => state.teams,
@@ -26,21 +32,38 @@ export function TeamResult() {
   )
 
   useEffect(() => {
-    if (teams.length === 0) {
+    if (
+      teams.length === 0 &&
+      !isFinishing &&
+      location.pathname !== '/'
+    ) {
       navigate('/configuracao', {
         replace: true,
       })
     }
-  }, [teams.length, navigate])
+  }, [teams.length, isFinishing, location.pathname, navigate])
 
   function handleBack() {
+    setIsFinishing(false)
     clearResult()
     navigate('/configuracao')
   }
 
   function handleResort() {
+    setIsFinishing(false)
     clearResult()
     navigate('/configuracao')
+  }
+
+  function handleFinish() {
+    setIsFinishing(true)
+    clearResult()
+    window.localStorage.removeItem(
+      'pelado-players',
+    )
+    navigate('/', {
+      replace: true,
+    })
   }
 
   if (teams.length === 0) {
@@ -89,7 +112,7 @@ export function TeamResult() {
           />
         </div>
 
-        <div className="mt-8">
+        <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={handleResort}
@@ -97,6 +120,14 @@ export function TeamResult() {
           >
             <RotateCcw size={20} />
             Sortear novamente
+          </button>
+
+          <button
+            type="button"
+            onClick={handleFinish}
+            className="flex w-full items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4 font-bold text-[var(--color-text-primary)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+          >
+            Finalizar sorteio
           </button>
         </div>
       </div>
