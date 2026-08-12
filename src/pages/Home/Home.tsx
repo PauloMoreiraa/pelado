@@ -22,8 +22,7 @@ export function Home() {
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-[var(--color-text-muted)] sm:text-lg">
-            Cadastre os jogadores, equilibre os times e
-            deixe o sorteio por conta do Peladô.
+            Cadastre os jogadores e deixe o Peladô sortear e cuidar do equilíbrio dos times.
           </p>
         </section>
 
