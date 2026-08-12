@@ -234,14 +234,6 @@ export function balanceTeams(
     return teams
   }
 
-  /*
-   * No modo goleiro fixo, os goleiros também
-   * participam do sorteio, mas não recebem
-   * prioridade de distribuição.
-   *
-   * Isso mantém o sorteio mais próximo de uma
-   * divisão normal de jogadores.
-   */
   const allPlayers = shuffle(players)
 
   allPlayers.sort((playerA, playerB) => {

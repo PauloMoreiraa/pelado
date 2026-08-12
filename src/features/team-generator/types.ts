@@ -5,7 +5,6 @@ import type {
 
 export type GoalkeeperMode =
   | 'none'
-  | 'fixed'
   | 'per-team'
 
 export interface GeneratedTeam {

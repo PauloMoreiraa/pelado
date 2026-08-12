@@ -1,5 +1,3 @@
-import type { Player } from '../../types/player'
-
 import { balanceTeams } from './balanceTeams'
 import { generateTeamNames } from './generateTeamName'
 

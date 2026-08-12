@@ -52,18 +52,6 @@ export function GoalkeeperConfig() {
       disabled:
         goalkeeperCount === 0,
     },
-    {
-      value: 'fixed',
-      title: 'Goleiro fixo',
-      description:
-        goalkeeperCount === 0
-          ? 'Cadastre pelo menos dois goleiros para usar esta opção.'
-          : goalkeeperCount === 1
-            ? 'É necessário ter pelo menos dois goleiros cadastrados.'
-            : 'Os goleiros ficam fixos e não entram no sorteio das equipes.',
-      disabled:
-        goalkeeperCount < 2,
-    },
   ]
 
   return (
