@@ -202,13 +202,6 @@ export function PlayerForm({
       return
     }
 
-    /*
-     * NOVO JOGADOR
-     *
-     * O ID é criado aqui para garantir
-     * que cada jogador tenha uma identidade
-     * própria.
-     */
     const newPlayer: Player = {
       id: crypto.randomUUID(),
       name: trimmedName,

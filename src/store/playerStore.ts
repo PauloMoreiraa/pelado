@@ -18,14 +18,6 @@ interface PlayerState {
   clearPlayers: () => void
 }
 
-/*
- * Garante que todos os jogadores tenham
- * um ID único.
- *
- * Isso também corrige jogadores antigos
- * que possam ter sido salvos sem ID no
- * localStorage.
- */
 function normalizePlayers(
   players: Player[],
 ): Player[] {
