@@ -109,11 +109,6 @@ export const usePlayerStore =
       {
         name: 'pelado-players',
 
-        /*
-         * Quando o Zustand recuperar os dados
-         * antigos do localStorage, normalizamos
-         * os IDs antes de colocá-los no estado.
-         */
         merge: (persistedState, currentState) => {
           const persisted =
             persistedState as Partial<PlayerState>
