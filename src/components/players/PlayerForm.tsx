@@ -59,11 +59,6 @@ export function PlayerForm({
 
   const isEditing = Boolean(player)
 
-  /*
-   * Normaliza o nome para evitar jogadores
-   * duplicados com diferenças de maiúsculas,
-   * minúsculas ou espaços.
-   */
   const normalizedName = name
     .trim()
     .toLocaleLowerCase()
@@ -71,10 +66,7 @@ export function PlayerForm({
   const isDuplicateName =
     normalizedName.length > 0 &&
     players.some((existingPlayer) => {
-      /*
-       * Quando estamos editando,
-       * ignoramos o próprio jogador.
-       */
+
       if (
         player &&
         existingPlayer.id === player.id
@@ -95,10 +87,6 @@ export function PlayerForm({
     Boolean(level) &&
     !isDuplicateName
 
-  /*
-   * Carrega os dados do jogador quando
-   * o usuário clica em "Editar".
-   */
   useEffect(() => {
     if (!player) {
       setName('')
@@ -114,10 +102,6 @@ export function PlayerForm({
     setIsGoalkeeper(player.isGoalkeeper)
     setError('')
 
-    /*
-     * Ao editar, leva o formulário para o topo
-     * da página para facilitar a visualização.
-     */
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
@@ -133,10 +117,6 @@ export function PlayerForm({
         .toLocaleLowerCase()
 
     return players.some((existingPlayer) => {
-      /*
-       * Não considera o próprio jogador
-       * como duplicado durante a edição.
-       */
       if (
         player &&
         existingPlayer.id === player.id

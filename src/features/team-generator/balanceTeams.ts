@@ -103,10 +103,6 @@ function distributeGoalkeepers(
         team.goalkeeperCount === 0,
     )
 
-    /*
-     * Enquanto existir uma equipe sem goleiro,
-     * sempre colocamos o próximo goleiro nela.
-     */
     if (availableTeams.length > 0) {
       const team = getBestTeam(
         availableTeams,
@@ -122,11 +118,6 @@ function distributeGoalkeepers(
       continue
     }
 
-    /*
-     * Se todas as equipes já possuem goleiro,
-     * jogadores adicionais podem ser distribuídos
-     * normalmente.
-     */
     const teamsWithSpace = teams.filter(
       (team) =>
         team.players.length <
@@ -157,12 +148,6 @@ function distributeFieldPlayers(
 ): void {
   const shuffledPlayers = shuffle(players)
 
-  /*
-   * Jogadores mais fortes entram primeiro.
-   *
-   * Isso reduz a possibilidade de concentrar
-   * muitos craques em uma mesma equipe.
-   */
   shuffledPlayers.sort((playerA, playerB) => {
     const strengthA =
       getPlayerStrength(playerA)
@@ -213,11 +198,6 @@ export function balanceTeams(
     (player) => !player.isGoalkeeper,
   )
 
-  /*
-   * No modo por equipe, tentamos garantir
-   * um goleiro por equipe antes de colocar
-   * um segundo goleiro.
-   */
   if (goalkeeperMode === 'per-team') {
     distributeGoalkeepers(
       teams,

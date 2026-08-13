@@ -26,10 +26,6 @@ function normalizePlayers(
   return players.map((player) => {
     let id = player.id
 
-    /*
-     * Se não existir ID ou se o ID estiver
-     * duplicado, cria um novo.
-     */
     if (!id || usedIds.has(id)) {
       id = crypto.randomUUID()
     }
@@ -51,13 +47,6 @@ export const usePlayerStore =
 
         addPlayer: (player) =>
           set((state) => {
-            /*
-             * O ID é sempre gerado pelo store.
-             *
-             * Assim nunca dependemos do
-             * formulário para identificar
-             * corretamente o jogador.
-             */
             const newPlayer: Player = {
               ...player,
               id:
